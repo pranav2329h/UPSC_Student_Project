@@ -1,0 +1,88 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* ── Light Mode ─────────────────────────────── */
+    --background: 248 250 252;   /* slate-50  */
+    --foreground: 15 23 42;      /* slate-900 */
+
+    --primary: 79 70 229;        /* indigo-600 */
+    --primary-foreground: 255 255 255;
+
+    --secondary: 226 232 240;    /* slate-200 */
+    --secondary-foreground: 30 41 59; /* slate-800 */
+
+    --accent: 16 185 129;        /* emerald-500 */
+    --accent-foreground: 255 255 255;
+
+    --muted: 241 245 249;        /* slate-100 */
+    --muted-foreground: 100 116 139; /* slate-500 */
+
+    --card: 255 255 255;
+    --card-foreground: 15 23 42;
+
+    --border: 226 232 240;       /* slate-200 */
+  }
+
+  .dark {
+    /* ── Dark Mode ──────────────────────────────── */
+    --background: 15 23 42;      /* slate-900 */
+    --foreground: 248 250 252;   /* slate-50  */
+
+    --primary: 99 102 241;       /* indigo-500 */
+    --primary-foreground: 255 255 255;
+
+    --secondary: 30 41 59;       /* slate-800 */
+    --secondary-foreground: 248 250 252;
+
+    --accent: 16 185 129;        /* emerald-500 */
+    --accent-foreground: 255 255 255;
+
+    --muted: 30 41 59;           /* slate-800 */
+    --muted-foreground: 148 163 184; /* slate-400 */
+
+    --card: 30 41 59;            /* slate-800 */
+    --card-foreground: 248 250 252;
+
+    --border: 51 65 85;          /* slate-700 */
+  }
+}
+
+@layer base {
+  * {
+    box-sizing: border-box;
+    border-color: rgb(var(--border));
+  }
+  body {
+    background-color: rgb(var(--background));
+    color: rgb(var(--foreground));
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+  }
+  .font-serif {
+    font-family: 'Playfair Display', Georgia, serif;
+  }
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--border));
+    border-radius: 9999px;
+  }
+}
+
+@layer components {
+  .glass-card {
+    background-color: rgba(var(--card) / 0.85);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(255 255 255 / 0.15);
+    box-shadow: 0 20px 40px -8px rgba(0 0 0 / 0.12);
+  }
+  .dark .glass-card {
+    border-color: rgba(255 255 255 / 0.08);
+  }
+}

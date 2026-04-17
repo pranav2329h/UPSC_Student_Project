@@ -24,12 +24,13 @@ generation_config = {
 }
 
 model = genai.GenerativeModel(
-    model_name="gemini-1.5-pro",
+    model_name="gemini-1.5-flash",
     generation_config=generation_config,
 )
 
 UPSC_PROMPT = """You are an expert UPSC (Union Public Service Commission) mentor and an AI knowledge architect.
-A student will provide you with a recent news article. Your task is to analyze it and return structured UPSC preparation content.
+A student will provide you with a recent news article (which may be in English, Hindi, or Marathi). 
+Your task is to analyze it and return structured UPSC preparation content in English (to maintain syllabus consistency).
 
 Return ONLY a valid JSON object matching this EXACT schema:
 
@@ -48,11 +49,26 @@ Return ONLY a valid JSON object matching this EXACT schema:
   ],
   "keywords": ["Keyword1", "Keyword2", "Keyword3", "Keyword4", "Keyword5"],
   "questions": {
-    "prelims": {
-      "question": "Multiple-choice question based on static knowledge from this news",
-      "options": ["Option A", "Option B", "Option C", "Option D"],
-      "correct_answer": "Exact string from options that is correct with brief reason"
-    },
+    "prelims": [
+      {
+        "question": "Multiple-choice question 1 based on static knowledge",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "correct_answer": "Exact string from options that is correct",
+        "explanation": "Brief reasoning for the answer"
+      },
+      {
+        "question": "Multiple-choice question 2 based on current appplication",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "correct_answer": "Exact string from options that is correct",
+        "explanation": "Brief reasoning for the answer"
+      },
+      {
+        "question": "Multiple-choice question 3 based on related facts",
+        "options": ["Option A", "Option B", "Option C", "Option D"],
+        "correct_answer": "Exact string from options that is correct",
+        "explanation": "Brief reasoning for the answer"
+      }
+    ],
     "mains": {
       "question": "10-15 mark UPSC mains standard question analyzing the issue (250 words)"
     }
@@ -113,13 +129,14 @@ def get_news():
     api_key = os.environ.get("GNEWS_API_KEY", "")
     category = request.args.get("category", "general")
     country = request.args.get("country", "in")
+    lang = request.args.get("lang", "en") # Added language support
 
-    if not api_key:
-        # Return mock news if no API key configured
+    # Detection for empty or placeholder keys
+    if not api_key or "your_" in api_key:
         return jsonify({"articles": [], "status": "no_api_key"})
 
     try:
-        url = f"https://gnews.io/api/v4/top-headlines?category={category}&country={country}&lang=en&max=10&token={api_key}"
+        url = f"https://gnews.io/api/v4/top-headlines?category={category}&country={country}&lang={lang}&max=10&token={api_key}"
         resp = requests.get(url, timeout=10)
         return jsonify(resp.json())
     except Exception as e:

@@ -12,8 +12,8 @@ export const analyzeArticle = async (text: string, id: string) => {
   return response.data;
 };
 
-export const fetchNews = async (category = 'general') => {
-  const response = await api.get(`/api/news?category=${category}`);
+export const fetchNews = async (category = 'general', lang = 'en') => {
+  const response = await api.get(`/api/news?category=${category}&lang=${lang}`);
   return response.data;
 };
 

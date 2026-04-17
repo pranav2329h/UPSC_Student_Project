@@ -18,61 +18,6 @@ const fadeUp = {
   visible: (i: number) => ({ opacity: 1, y: 0, transition: { delay: i * 0.12, duration: 0.5 } }),
 };
 
-/* ─── MOCK fallback ──────────────────────────────────────────────── */
-const MOCK: any = {
-  summary:
-    "The Supreme Court's unanimous verdict strikes down the Electoral Bonds scheme, citing it as unconstitutional and violating citizens' right to information under Article 19(1)(a). The SBI has been directed to disclose all bond details to the Election Commission.",
-  subjects: { primary: 'Indian Polity', secondary: ['Governance', 'Ethics & Integrity'] },
-  static_concepts: [
-    {
-      topic: 'Article 19(1)(a) – Freedom of Speech & Expression',
-      explanation:
-        'Guarantees every citizen the right to freedom of speech and expression. Courts have extended this to include the right to receive information, making electoral funding transparency a fundamental right.',
-      icon: 'Scale',
-    },
-    {
-      topic: 'Representation of the People Act, 1951',
-      explanation:
-        'Governs elections to Parliament and state legislatures. Sections 29A and 29C deal with registration of political parties and financial disclosures, both relevant to the electoral bond judgment.',
-      icon: 'FileText',
-    },
-    {
-      topic: 'Judicial Review & Basic Structure Doctrine',
-      explanation:
-        'The power under Article 13 and 32 allows the Supreme Court to strike down laws inconsistent with the Constitution. Electoral bonds were struck down as violating the basic structure (free & fair elections).',
-      icon: 'Gavel',
-    },
-  ],
-  keywords: ['Electoral Bonds', 'Article 19', 'Supreme Court', 'SBI', 'Political Funding', 'Transparency', 'ECI'],
-  questions: {
-    prelims: {
-      question: 'Which Article of the Constitution forms the primary basis for the Right to Information in India?',
-      options: ['Article 14', 'Article 19(1)(a)', 'Article 21', 'Article 32'],
-      correct_answer: 'Article 19(1)(a)',
-    },
-    mains: {
-      question:
-        `Critically examine the implications of anonymous political funding on democratic accountability. How does the Supreme Court's ruling on Electoral Bonds strengthen the constitutional right to information? (250 words)`,
-    },
-  },
-  knowledge_graph: {
-    nodes: [
-      { id: 'news', label: 'Electoral Bonds', type: 'news' },
-      { id: 's1', label: 'Indian Polity', type: 'subject' },
-      { id: 's2', label: 'Governance', type: 'subject' },
-      { id: 't1', label: 'Article 19', type: 'topic' },
-      { id: 't2', label: 'RPA 1951', type: 'topic' },
-      { id: 't3', label: 'Judicial Review', type: 'topic' },
-    ],
-    edges: [
-      { from: 'news', to: 's1' },
-      { from: 'news', to: 's2' },
-      { from: 's1', to: 't1' },
-      { from: 's1', to: 't2' },
-      { from: 's1', to: 't3' },
-    ],
-  },
-};
 
 export default function AnalysisPage() {
   const { id } = useParams();
@@ -91,14 +36,20 @@ export default function AnalysisPage() {
     const run = async () => {
       try {
         setLoading(true);
+        setError('');
         const text = `${article.title}. ${article.description}`;
         const result = await analyzeArticle(text, article.id);
-        setAnalysis(result);
-      } catch {
-        // Fallback to mock for demo
-        setTimeout(() => setAnalysis(MOCK), 2800);
+        
+        if (result.error) {
+          setError(result.error);
+        } else {
+          setAnalysis(result);
+        }
+      } catch (err: any) {
+        console.error("Analysis Error:", err);
+        setError(err.response?.data?.error || "AI Analysis failed. Please check your GEMINI_API_KEY in the backend .env file.");
       } finally {
-        setTimeout(() => setLoading(false), 3000);
+        setLoading(false);
       }
     };
     run();
@@ -131,7 +82,7 @@ export default function AnalysisPage() {
           <h2 className="text-2xl font-extrabold bg-gradient-to-r from-indigo-500 to-emerald-500 bg-clip-text text-transparent">
             AI Linking to Syllabus...
           </h2>
-          <p className="text-muted-foreground">Finding static concepts, generating questions &amp; knowledge graph</p>
+          <p className="text-muted-foreground">Finding static concepts, generating multiple questions &amp; knowledge graph</p>
         </div>
         {/* Progress steps */}
         <div className="flex gap-6">
@@ -175,7 +126,6 @@ export default function AnalysisPage() {
 
       {/* ── HERO HEADER ────────────────────────────────────────── */}
       <div className="relative overflow-hidden bg-gradient-to-br from-indigo-600 via-violet-600 to-indigo-800 rounded-3xl p-8 md:p-12 text-white shadow-2xl shadow-indigo-500/30">
-        {/* Background orbs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-64 h-64 bg-emerald-400/10 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
@@ -261,38 +211,48 @@ export default function AnalysisPage() {
                   initial={{ opacity: 0, x: -10 }}
                   animate={{ opacity: 1, x: 0 }}
                   exit={{ opacity: 0, x: 10 }}
-                  className="space-y-6"
+                  className="space-y-8"
                 >
-                  {/* Prelims MCQ */}
-                  <div className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden">
-                    <div className="absolute top-0 right-0 opacity-5">
-                      <Fingerprint size={100} />
-                    </div>
-                    <span className="text-xs font-bold uppercase tracking-widest text-indigo-500 mb-3 block">
-                      📝 Prelims MCQ
-                    </span>
-                    <p className="font-semibold text-lg mb-4 leading-snug">{analysis.questions.prelims.question}</p>
-                    <div className="grid sm:grid-cols-2 gap-3">
-                      {analysis.questions.prelims.options.map((opt: string, i: number) => {
-                        const isCorrect = opt === analysis.questions.prelims.correct_answer;
-                        return (
-                          <div
-                            key={i}
-                            className={`flex items-center gap-3 p-3.5 rounded-xl border text-sm font-medium transition-all ${
-                              isCorrect
-                                ? 'border-emerald-400 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
-                                : 'border-border bg-background text-foreground'
-                            }`}
-                          >
-                            <span className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold flex-shrink-0">
-                              {String.fromCharCode(65 + i)}
-                            </span>
-                            <span className="flex-grow">{opt}</span>
-                            {isCorrect && <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />}
+                  {/* Prelims MCQs */}
+                  <div className="space-y-6">
+                    {(Array.isArray(analysis.questions.prelims) ? analysis.questions.prelims : [analysis.questions.prelims]).map((mcq: any, idx: number) => (
+                      <div key={idx} className="bg-card border border-border rounded-2xl p-6 relative overflow-hidden">
+                        <div className="absolute top-0 right-0 opacity-5">
+                          <Fingerprint size={100} />
+                        </div>
+                        <span className="text-xs font-bold uppercase tracking-widest text-indigo-500 mb-3 block">
+                          📝 Prelims MCQ #{idx + 1}
+                        </span>
+                        <p className="font-semibold text-lg mb-4 leading-snug">{mcq.question}</p>
+                        <div className="grid sm:grid-cols-2 gap-3 mb-4">
+                          {mcq.options.map((opt: string, i: number) => {
+                            const isCorrect = opt === mcq.correct_answer;
+                            return (
+                              <div
+                                key={i}
+                                className={`flex items-center gap-3 p-3.5 rounded-xl border text-sm font-medium transition-all ${
+                                  isCorrect
+                                    ? 'border-emerald-400 bg-emerald-50 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300'
+                                    : 'border-border bg-background text-foreground'
+                                }`}
+                              >
+                                <span className="w-6 h-6 rounded-full bg-muted flex items-center justify-center text-xs font-bold flex-shrink-0">
+                                  {String.fromCharCode(65 + i)}
+                                </span>
+                                <span className="flex-grow">{opt}</span>
+                                {isCorrect && <CheckCircle2 size={16} className="text-emerald-500 flex-shrink-0" />}
+                              </div>
+                            );
+                          })}
+                        </div>
+                        {mcq.explanation && (
+                          <div className="mt-4 p-4 bg-muted/50 rounded-xl border border-dashed border-border text-sm text-muted-foreground">
+                            <span className="font-bold text-indigo-500 uppercase text-[10px] block mb-1">Explanation</span>
+                            {mcq.explanation}
                           </div>
-                        );
-                      })}
-                    </div>
+                        )}
+                      </div>
+                    ))}
                   </div>
 
                   {/* Mains */}
